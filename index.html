@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Muszi</title>
+    <meta name="description" content="A vinyl music player for the web. Drop your records in the crate and put the needle down." />
+    <meta name="theme-color" content="#3a3836" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true">
+      <div class="bg-art"></div>
+      <div class="bg-art"></div>
+    </div>
+
+    <!-- Now playing -->
+    <main class="view view-player is-active" data-view="player" aria-label="Now playing">
+      <div class="deck" id="deck"></div>
+
+      <button class="glass-btn corner corner-tr" type="button" popovertarget="settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4Z" /><circle cx="12" cy="12" r="3.2" /></svg>
+      </button>
+      <button class="glass-btn corner corner-bl" type="button" data-action="add" aria-label="Add music">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="13" r="7.5" /><circle cx="11" cy="13" r="1.6" /><path d="M19 2v6M16 5h6" /></svg>
+      </button>
+      <button class="glass-btn corner corner-br" type="button" popovertarget="more" aria-label="More">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6" class="fill" /><circle cx="12" cy="12" r="1.6" class="fill" /><circle cx="18.5" cy="12" r="1.6" class="fill" /></svg>
+      </button>
+
+      <div class="empty-card glass" id="emptyCard">
+        <p class="empty-title">Your crate is empty</p>
+        <p class="empty-copy">Drag in songs or a whole album folder. Cover art and titles come from the files' tags.</p>
+        <div class="empty-actions">
+          <button class="pill-btn is-primary" type="button" data-action="add">Add music</button>
+          <button class="pill-btn" type="button" data-action="demo">Press demo records</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Crate -->
+    <section class="view view-library" data-view="library" aria-label="Crate">
+      <header class="topbar">
+        <button class="glass-btn" type="button" data-go="player" aria-label="Back to the turntable">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14M9.5 5v14M14 5v14" /><path d="m17 5 3 1v12l-3 1Z" /></svg>
+        </button>
+        <div class="segmented" role="tablist" aria-label="Crate sections">
+          <button type="button" role="tab" data-tab="albums" aria-selected="true">Albums</button>
+          <button type="button" role="tab" data-tab="playlists" aria-selected="false">Playlists</button>
+        </div>
+        <div class="search">
+          <input id="search" type="search" placeholder="Search the crate" aria-label="Search the crate" />
+          <button class="glass-btn" type="button" id="searchBtn" aria-label="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></svg>
+          </button>
+        </div>
+      </header>
+      <div class="crate3d" id="crate3d"></div>
+      <p class="crate-empty" id="crateEmpty"></p>
+    </section>
+
+    <!-- Queue -->
+    <section class="view view-queue" data-view="queue" aria-label="Queue">
+      <header class="topbar">
+        <span></span>
+        <h2 class="view-title">Queue</h2>
+        <div class="topbar-actions">
+          <button class="glass-btn" type="button" id="shuffleBtn" aria-pressed="false" aria-label="Shuffle">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h4v4" /><path d="M4 20 20 4" /><path d="M20 16v4h-4" /><path d="m15 15 5 5" /><path d="M4 4l5 5" /></svg>
+          </button>
+          <button class="glass-btn" type="button" id="repeatBtn" aria-pressed="false" aria-label="Repeat">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l3 3-3 3" /><path d="M4 12v-1a5 5 0 0 1 5-5h11" /><path d="M7 21l-3-3 3-3" /><path d="M20 12v1a5 5 0 0 1-5 5H4" /></svg>
+            <span class="badge" aria-hidden="true">1</span>
+          </button>
+        </div>
+      </header>
+      <div class="q-body">
+        <figure class="q-cover q-now">
+          <div class="q-art" id="qNowArt"></div>
+          <figcaption id="qFrom"></figcaption>
+        </figure>
+        <ol class="track-grid" id="qGrid"></ol>
+        <figure class="q-cover q-next" id="qNext">
+          <button class="q-art" type="button" id="qNextArt" aria-label="Play next"></button>
+          <figcaption><b id="qNextTitle"></b><span id="qNextArtist"></span></figcaption>
+        </figure>
+      </div>
+      <div class="q-footer">
+        <button class="pill-btn" type="button" id="saveQueueBtn">Save queue as playlist</button>
+      </div>
+    </section>
+
+    <!-- Album / playlist -->
+    <section class="view view-detail" data-view="detail" aria-label="Album">
+      <header class="topbar">
+        <button class="glass-btn" type="button" data-go="library" aria-label="Back to the crate">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7" /></svg>
+        </button>
+        <span></span>
+        <span></span>
+      </header>
+      <div class="d-body">
+        <div class="d-cover q-art" id="dArt"></div>
+        <div class="d-main">
+          <p class="d-kind" id="dKind"></p>
+          <h2 class="d-title" id="dTitle"></h2>
+          <p class="d-meta" id="dMeta"></p>
+          <div class="d-actions">
+            <button class="pill-btn is-primary" type="button" id="dPlay">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5Z" class="fill" /></svg>Play
+            </button>
+            <button class="pill-btn" type="button" id="dShuffle">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 4h4v4" /><path d="M4 20 20 4" /><path d="M20 16v4h-4" /><path d="m15 15 5 5" /><path d="M4 4l5 5" /></svg>Shuffle
+            </button>
+            <button class="pill-btn is-quiet" type="button" id="dDelete">Delete playlist</button>
+          </div>
+          <ol class="track-grid" id="dGrid"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dock -->
+    <nav class="dock glass" aria-label="Player controls">
+      <button class="dock-btn" type="button" id="libBtn" data-go="library" aria-label="Crate (L)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5v14M8 5v14" /><path d="M12 5h2.5a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H12Z" /><path d="M16.5 8.5 20 12l-3.5 3.5" /></svg>
+      </button>
+      <div class="pill">
+        <button class="pill-main" type="button" id="pillMain" aria-label="Show the turntable">
+          <span class="mini-rec" id="miniRec"><span class="mini-label"></span></span>
+          <span class="pill-text">
+            <b id="pillTitle">Nothing playing</b>
+            <span class="pill-sub"><span id="pillArtist">Muszi</span><span class="pill-time" id="pillTime">0:00 / 0:00</span></span>
+          </span>
+        </button>
+        <button class="pill-play" type="button" id="playBtn" aria-label="Play">
+          <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 5v14l11.5-7Z" /></svg>
+          <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2" /><rect x="14" y="5" width="4" height="14" rx="1.2" /></svg>
+        </button>
+        <button class="pill-next" type="button" id="nextBtn" aria-label="Next (N)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5v13l9-6.5Z" /><rect x="15.5" y="5.5" width="3" height="13" rx="1" /></svg>
+        </button>
+        <div class="pill-progress" id="pillProgress" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <i id="pillBar"></i>
+        </div>
+      </div>
+      <button class="dock-btn" type="button" id="queueBtn" data-go="queue" aria-label="Queue (Q)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h12M4 11h12M4 16h6" /><path d="M14 16.5a3.5 3.5 0 1 0 1-2.5" /><path d="M14 12v2.5h2.5" /></svg>
+      </button>
+    </nav>
+
+    <!-- Popovers -->
+    <div id="settings" class="panel glass" popover>
+      <h3>Turntable</h3>
+      <fieldset>
+        <legend>Music from</legend>
+        <div class="chips" data-setting="source">
+          <button type="button" data-value="local">My files</button>
+          <button type="button" data-value="spotify">Spotify</button>
+        </div>
+        <div class="spotify-box" id="spBox">
+          <p class="sp-status" id="spStatus">Not connected</p>
+          <div class="sp-setup" id="spSetup">
+            <p class="hint" id="spHostHint" hidden></p>
+            <label class="field">
+              <span>Client ID</span>
+              <input id="spClientId" type="text" autocomplete="off" spellcheck="false" placeholder="From your Spotify developer app" />
+            </label>
+            <p class="hint">
+              In the <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify dashboard</a>, create an app
+              with the Web API and Web Playback SDK, and add this redirect URI:
+            </p>
+            <div class="copy-row"><code id="spRedirect"></code><button type="button" class="chip-btn" id="spCopy">Copy</button></div>
+          </div>
+          <div class="chips" data-setting="spOutput" id="spOutput">
+            <button type="button" data-value="browser">Play here</button>
+            <button type="button" data-value="remote">Control Spotify app</button>
+          </div>
+          <button type="button" class="pill-btn sp-connect" id="spConnect">Connect Spotify</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Vinyl</legend>
+        <div class="swatches" data-setting="vinyl">
+          <button type="button" data-value="cover"><span class="dot dot-cover"></span>Cover</button>
+          <button type="button" data-value="clear"><span class="dot dot-clear"></span>Clear</button>
+          <button type="button" data-value="color"><span class="dot dot-color"></span>Colour</button>
+          <button type="button" data-value="black"><span class="dot dot-black"></span>Black</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Label</legend>
+        <div class="chips" data-setting="label">
+          <button type="button" data-value="auto">Mixed</button>
+          <button type="button" data-value="h">Across</button>
+          <button type="button" data-value="v">Along</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Speed</legend>
+        <div class="chips" data-setting="rpm">
+          <button type="button" data-value="33">33⅓</button>
+          <button type="button" data-value="45">45</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Sound</legend>
+        <label class="switch-row">
+          <span>Surface crackle</span>
+          <input type="checkbox" id="crackleToggle" role="switch" />
+        </label>
+        <label class="range-row">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9Z" class="fill" /><path d="M16.5 8.5a5 5 0 0 1 0 7" /></svg>
+          <input id="volume" type="range" min="0" max="1" step="0.01" aria-label="Volume" />
+        </label>
+      </fieldset>
+    </div>
+
+    <div id="more" class="menu glass" popover>
+      <button type="button" data-action="add">Add songs…</button>
+      <button type="button" data-action="folder">Add a folder…</button>
+      <button type="button" data-action="demo">Press demo records</button>
+      <button type="button" data-action="spotify">Spotify…</button>
+      <hr />
+      <button type="button" data-action="clear" class="is-danger">Clear the crate</button>
+    </div>
+
+    <div class="drop-overlay" aria-hidden="true">
+      <div class="drop-card">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="2" /></svg>
+        <p>Drop to add to your crate</p>
+      </div>
+    </div>
+
+    <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
+    <input type="file" id="fileInput" accept="audio/*,.mp3,.flac,.wav,.m4a,.aac,.ogg,.oga,.opus,.webm" multiple hidden />
+    <input type="file" id="folderInput" webkitdirectory multiple hidden />
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

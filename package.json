@@ -1,0 +1,15 @@
+{
+  "name": "muszi",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A tactile turntable music player for the web.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.3.1"
+  }
+}
