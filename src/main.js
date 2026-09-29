@@ -521,7 +521,14 @@ function spError(err) {
   const s = err?.status;
   let msg = err?.message || 'Spotify had a problem.';
   if (s === 401) msg = 'Spotify needs you to connect again.';
-  else if (s === 403) msg = err.reason === 'PREMIUM_REQUIRED' ? 'That needs Spotify Premium.' : "Spotify refused that. Is your account on the app's user list?";
+  else if (s === 403) {
+    msg =
+      err.reason === 'PREMIUM_REQUIRED'
+        ? 'That needs Spotify Premium.'
+        : sp.usingCustomApp
+          ? 'Spotify refused this account. Add it under User Management in your Spotify app.'
+          : 'This Spotify account isn’t on Muszi’s guest list yet. Ask the owner to add it.';
+  }
   else if (s === 404) msg = 'No active Spotify device. Open Spotify on a device, or choose “Play here” in settings.';
   lastSpError = Date.now();
   toast(msg, 4500);
@@ -934,7 +941,8 @@ function paintSpotify() {
   box.classList.toggle('is-connected', sp.connected);
   const name = sp.user?.display_name || sp.user?.id;
   $('#spStatus').textContent = sp.connected ? `Connected${name ? ` as ${name}` : ''}` : 'Not connected';
-  if (document.activeElement !== $('#spClientId')) $('#spClientId').value = sp.clientId;
+  if (document.activeElement !== $('#spClientId')) $('#spClientId').value = sp.customClientId;
+  if (sp.usingCustomApp) $('.sp-advanced').open = true;
   $('#spRedirect').textContent = sp.redirectUri;
   $('#spConnect').textContent = sp.connected ? 'Disconnect Spotify' : 'Connect Spotify';
   const hint = $('#spHostHint');
@@ -1725,11 +1733,6 @@ $('#spConnect').addEventListener('click', async () => {
   sp.setClientId($('#spClientId').value);
   if (location.hostname === 'localhost') {
     toast('Open Muszi at 127.0.0.1 first. Spotify doesn’t accept “localhost”.', 5000);
-    return;
-  }
-  if (!sp.clientId) {
-    toast('Paste your app’s Client ID first.');
-    $('#spClientId').focus();
     return;
   }
   sp.login();

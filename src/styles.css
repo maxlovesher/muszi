@@ -1246,6 +1246,21 @@ li:hover .t-remove ~ .t-dur {
   color: #0b0b0b;
 }
 
+.sp-advanced summary {
+  width: fit-content;
+  color: var(--muted);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.sp-advanced summary:hover {
+  color: #fff;
+}
+
+.sp-advanced[open] > * + * {
+  margin-top: 10px;
+}
+
 .field {
   display: flex;
   flex-direction: column;

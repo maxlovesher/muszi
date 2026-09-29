@@ -168,15 +168,19 @@
           <p class="sp-status" id="spStatus">Not connected</p>
           <div class="sp-setup" id="spSetup">
             <p class="hint" id="spHostHint" hidden></p>
-            <label class="field">
-              <span>Client ID</span>
-              <input id="spClientId" type="text" autocomplete="off" spellcheck="false" placeholder="From your Spotify developer app" />
-            </label>
-            <p class="hint">
-              In the <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify dashboard</a>, create an app
-              with the Web API and Web Playback SDK, and add this redirect URI:
-            </p>
-            <div class="copy-row"><code id="spRedirect"></code><button type="button" class="chip-btn" id="spCopy">Copy</button></div>
+            <p class="hint">Log in with Spotify to play your saved albums and playlists. Needs Spotify Premium.</p>
+            <details class="sp-advanced">
+              <summary>Use my own Spotify app</summary>
+              <label class="field">
+                <span>Client ID (leave empty to use Muszi's)</span>
+                <input id="spClientId" type="text" autocomplete="off" spellcheck="false" placeholder="From your Spotify developer app" />
+              </label>
+              <p class="hint">
+                In the <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">Spotify dashboard</a>, create an app
+                with the Web API and Web Playback SDK, and add this redirect URI:
+              </p>
+              <div class="copy-row"><code id="spRedirect"></code><button type="button" class="chip-btn" id="spCopy">Copy</button></div>
+            </details>
           </div>
           <div class="chips" data-setting="spOutput" id="spOutput">
             <button type="button" data-value="browser">Play here</button>

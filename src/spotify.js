@@ -5,6 +5,11 @@
 const API = 'https://api.spotify.com/v1';
 const ACCOUNTS = 'https://accounts.spotify.com';
 const KEY = 'muszi:spotify';
+
+// Muszi's own Spotify app. A Client ID is public (PKCE needs no secret), so
+// shipping it lets people connect in one click. Spotify only lets accounts
+// listed under the app's User Management log in while it's in development mode.
+const DEFAULT_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID || 'a942d890a7c4444eaae06959ed7e44bb';
 const PKCE_KEY = 'muszi:pkce';
 const SCOPES = [
   'streaming',
@@ -78,7 +83,8 @@ export class Spotify extends EventTarget {
   constructor() {
     super();
     const cfg = read();
-    this.clientId = cfg.clientId || import.meta.env.VITE_SPOTIFY_CLIENT_ID || '';
+    // A Client ID typed into settings overrides the built-in one.
+    this.customClientId = cfg.clientId && cfg.clientId !== DEFAULT_CLIENT_ID ? cfg.clientId : '';
     this.output = cfg.output === 'remote' ? 'remote' : 'browser';
     this.token = cfg.token || null;
     this.user = null;
@@ -88,6 +94,10 @@ export class Spotify extends EventTarget {
     this.playerError = null;
     this.pollTimer = null;
     this.refreshing = null;
+  }
+
+  get clientId() {
+    return this.customClientId || DEFAULT_CLIENT_ID;
   }
 
   get connected() {
@@ -101,15 +111,22 @@ export class Spotify extends EventTarget {
 
   #save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ clientId: this.clientId, output: this.output, token: this.token }));
+      localStorage.setItem(KEY, JSON.stringify({ clientId: this.customClientId, output: this.output, token: this.token }));
     } catch {
       /* ignore */
     }
   }
 
   setClientId(id) {
-    this.clientId = id.trim();
+    const next = id.trim() === DEFAULT_CLIENT_ID ? '' : id.trim();
+    // Tokens belong to the app that issued them.
+    if (next !== this.customClientId && this.token) this.logout();
+    this.customClientId = next;
     this.#save();
+  }
+
+  get usingCustomApp() {
+    return !!this.customClientId;
   }
 
   setOutput(output) {
