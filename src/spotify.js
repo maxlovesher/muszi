@@ -241,8 +241,15 @@ export class Spotify extends EventTarget {
       const data = await res.json().catch(() => ({}));
       throw Object.assign(new Error(data.error?.message || `Spotify error ${res.status}`), { status: res.status, reason: data.error?.reason });
     }
+    // Player commands (play, pause, seek…) can answer 200 with a non-JSON
+    // body, so only parse what's labelled as JSON.
     const text = await res.text();
-    return text ? JSON.parse(text) : null;
+    if (!text || !(res.headers.get('Content-Type') || '').includes('json')) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
   }
 
   async paged(path, max = 300) {

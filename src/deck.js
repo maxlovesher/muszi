@@ -18,6 +18,10 @@ export const G = {
   rest: 0,
 };
 
+// A true 33⅓ RPM looks frantic on screen; spin the record at a calmer
+// fraction of real speed.
+const SPIN_SCALE = 0.4;
+
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -612,7 +616,7 @@ export class Deck {
     const k = this.spinning ? 3.2 : 1.3;
     this.rpmNow += (target - this.rpmNow) * (1 - Math.exp(-dt * k));
     if (!this.spinning && this.rpmNow < 0.05) this.rpmNow = 0;
-    this.rot = (this.rot + this.rpmNow * 6 * dt) % 360;
+    this.rot = (this.rot + this.rpmNow * 6 * SPIN_SCALE * dt) % 360;
 
     if (this.armMode === 'follow') {
       const t = angleForProgress(this.progress());

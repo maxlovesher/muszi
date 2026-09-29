@@ -533,7 +533,7 @@ body:not(.is-empty) .empty-card {
     repeating-radial-gradient(circle, rgb(255 255 255 / 0.06) 0 0.6px, transparent 0.6px 2px),
     #121212;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
-  animation: spin 1.8s linear infinite;
+  animation: spin 4.5s linear infinite;
   animation-play-state: paused;
 }
 
