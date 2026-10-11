@@ -522,12 +522,15 @@ function spError(err) {
   let msg = err?.message || 'Spotify had a problem.';
   if (s === 401) msg = 'Spotify needs you to connect again.';
   else if (s === 403) {
-    msg =
-      err.reason === 'PREMIUM_REQUIRED'
-        ? 'That needs Spotify Premium.'
-        : sp.usingCustomApp
-          ? 'Spotify refused this account. Add it under User Management in your Spotify app.'
-          : 'This Spotify account isn’t on Muszi’s guest list yet. Ask the owner to add it.';
+    // Spotify uses 403 for several different refusals; tell them apart by
+    // its reason/message rather than guessing.
+    const raw = `${err.reason || ''} ${err.message || ''}`;
+    if (/premium/i.test(raw)) msg = 'Spotify says this needs Premium. Try “Control Spotify app” in settings instead.';
+    else if (/regist|allow|user management/i.test(raw))
+      msg = sp.usingCustomApp
+        ? 'Spotify refused this account. Add it under User Management in your Spotify app.'
+        : 'This Spotify account isn’t on Muszi’s guest list yet. Ask the owner to add it.';
+    else msg = `Spotify refused that: ${err.message || 'no reason given'}`;
   }
   else if (s === 404) msg = 'No active Spotify device. Open Spotify on a device, or choose “Play here” in settings.';
   lastSpError = Date.now();
