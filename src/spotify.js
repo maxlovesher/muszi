@@ -238,8 +238,17 @@ export class Spotify extends EventTarget {
       return this.api(path, { method, body, retry: false });
     }
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw Object.assign(new Error(data.error?.message || `Spotify error ${res.status}`), { status: res.status, reason: data.error?.reason });
+      // Errors are usually JSON, but some (e.g. "the user may not be
+      // registered") arrive as plain text.
+      const body = await res.text().catch(() => '');
+      let data = {};
+      try {
+        data = JSON.parse(body);
+      } catch {
+        /* plain text */
+      }
+      const message = data.error?.message || (typeof data.error === 'string' ? data.error : '') || body.trim().slice(0, 200);
+      throw Object.assign(new Error(message || `Spotify error ${res.status}`), { status: res.status, reason: data.error?.reason });
     }
     // Player commands (play, pause, seek…) can answer 200 with a non-JSON
     // body, so only parse what's labelled as JSON.
