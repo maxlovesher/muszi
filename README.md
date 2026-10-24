@@ -4,7 +4,7 @@ A vinyl music player for the web, inspired by MD Vinyl. Your music sits in a
 crate of sleeves; put a record on and drop the needle anywhere to play from
 that point.
 
-**Live:** https://maxlovesher.github.io/muszi/
+**Live:** https://muszi.maxlovesher.com/
 
 - Plays your own files (MP3, FLAC, WAV, M4A, OGG). They're stored in your
   browser, never uploaded.
@@ -28,7 +28,7 @@ Open the `http://127.0.0.1:…` address Vite prints (not `localhost`; see below)
    with the **Web API** and **Web Playback SDK** enabled.
 2. Add a redirect URI for every address you'll use Muszi from, exactly as shown
    in Muszi's settings (gear icon), for example:
-   - `https://maxlovesher.github.io/muszi/`
+   - `https://muszi.maxlovesher.com/`
    - `http://127.0.0.1:5173/`
 3. Paste the app's Client ID into Muszi's settings and press **Connect Spotify**.
 
